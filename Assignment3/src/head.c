@@ -87,6 +87,10 @@ int main(int argc, char *argv[]) {
       ++fileIndex;
     }
   }
+  // No file given.
+  if (fileIndex == 0) {
+    printf("head: no file given");
+  }
 
   printf("%c | %d | %d\n", printFlag, amountToPrint, printHeaders);
   for (int i = 0; i < fileIndex; ++i) {
