@@ -8,6 +8,9 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <dirent.h>
 
 int charIsInt(char toCheck);
 char toLower(char c);
@@ -52,6 +55,13 @@ int main(int argc, char *argv[]) {
               return -1;
             }
 
+            // Check for negatives.
+            int negative = 0;
+            if (cArray[0] == '-') {
+              cArray++;
+              negative = 1;
+            }
+
             int value = cArrayToInt(cArray);
             // Not a valid int, print error msg and exit.
             if (value == -1) {
@@ -61,10 +71,14 @@ int main(int argc, char *argv[]) {
               } else {  // Lines flag.
                 printf("lines");
               }
-              printf(": \'%s\'\n", &argvI[j + 1]);
+              printf(": \'%s\'\n", cArray);
               return -1;
             }
             j = argvISize;
+            // Was a negative.
+            if (negative == 1) {
+              value *= -1;
+            }
             amountToPrint = value;
             break;
           }
@@ -87,15 +101,38 @@ int main(int argc, char *argv[]) {
       ++fileIndex;
     }
   }
-  // No file given.
+  // No file given; print error and exit.
   if (fileIndex == 0) {
-    printf("head: no file given");
+    printf("head: no file given\n");
+    return -1;
   }
 
+  // For every file.
+  for (int i = 0; i < fileIndex; ++i) {
+    // Get index of file; -1 = failed.
+    int fileDescriptor = open(fileNames[i], O_RDONLY);
+    // Failed to open file; print and exit.
+    if (fileDescriptor == -1) {
+      printf("head: cannot open \'%s\' for reading: ", fileNames[i]);
+      printf("No such file or directory\n");
+      return -1;
+    }
+    // File name given was a directory; print and exit.
+    if (opendir(fileNames[i]) != NULL) {
+      printf("head: error reading \'%s\': Is a directory\n", fileNames[i]);
+      return -1;
+    }
+    // Everything is fine.
+    // while (read())
+  }
+
+  //
+  // FOR DEBUGING: Print information
   printf("%c | %d | %d\n", printFlag, amountToPrint, printHeaders);
   for (int i = 0; i < fileIndex; ++i) {
     printf("%s\n", fileNames[i]);
   }
+  //
 
   return 0;
 }
@@ -114,6 +151,11 @@ char toLower(char c) {
 int cArrayToInt(char *cArray) {
   int value = 0;
   int cArraySize = strlen(cArray);
+  // Nothing to convert!
+  if (cArraySize == 0) {
+    return -1;
+  }
+  // For every char.
   for (int i = 0; i < cArraySize; ++i) {
     value *= 10;
     // Not an int.
