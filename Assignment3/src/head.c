@@ -10,6 +10,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <utmp.h>
 #include <dirent.h>
 
 int charIsInt(char toCheck);
@@ -123,7 +124,10 @@ int main(int argc, char *argv[]) {
       return -1;
     }
     // Everything is fine.
-    // while (read())
+    struct utmp currentFile;
+    while (read(fileDescriptor, &currentFile, 7)) {
+      printf("%s\n", currentFile.ut_line);
+    }
   }
 
   //
