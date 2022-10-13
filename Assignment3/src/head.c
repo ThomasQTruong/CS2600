@@ -174,7 +174,6 @@ int main(int argc, char *argv[]) {
  * @return int - 1 = true, 0 = false.
  */ 
 int charIsInt(char toCheck) {
-  printf("%d", toCheck > 47 && toCheck < 58);
   return toCheck > 47 && toCheck < 58;
 }
 
