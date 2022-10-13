@@ -13,16 +13,19 @@
 #include <utmp.h>
 #include <dirent.h>
 
+// Checks whether a char is an int.
 int charIsInt(char toCheck);
+// Converts an uppercase char to lowercase.
 char toLower(char c);
-int cArrayToInt(char *cArray);
+// Converts a char array (string) into an int.
+int cArrayToInt(const char *cArray);
 
 int main(int argc, char *argv[]) {
-  char printFlag = 'n';    // default is n.
-  int amountToPrint = 10;  // default is 10 lines.
-  int printHeaders = 0;    // -1 = never, 0 = default, 1 = always.
-  char *fileNames[argc - 1];
-  int fileIndex = 0;
+  char printFlag = 'n';       // default is n.
+  int amountToPrint = 10;     // default is 10 lines.
+  int printHeaders = 0;       // -1 = never, 0 = default, 1 = always.
+  char *fileNames[argc - 1];  // Name of files.
+  int fileIndex = 0;          // Points to the next array slot in fileNames.
 
   // Get arguments.
   for (int i = 1; i < argc; ++i) {
@@ -35,9 +38,9 @@ int main(int argc, char *argv[]) {
       for (int j = 1; j < argvISize; ++j) {
         // Set proper values based on flag(s).
         switch (argvI[j]) {
-          case 'n':
+          case 'n':  // Line number flag.
           case 'N':
-          case 'c':
+          case 'c':  // Characters/bytes flag.
           case 'C':
           {
             // Set flag variable.
@@ -51,7 +54,7 @@ int main(int argc, char *argv[]) {
               cArray = argv[i + 1];
               // Skip next argument since it is the line/byte number.
               ++i;
-            } else {
+            } else {  // ERROR: no no argument given.
               printf("head: option requires an argument -- \'%c\'\n", argvI[j]);
               return -1;
             }
@@ -83,15 +86,15 @@ int main(int argc, char *argv[]) {
             amountToPrint = value;
             break;
           }
-          case 'q':
+          case 'q':  // Quiet flag (do not print file names).
           case 'Q':
             printHeaders = -1;
             break;
-          case 'v':
+          case 'v':  // Verbose flag (print all file names).
           case 'V':
             printHeaders = 1;
             break;
-          default:
+          default:  // ERROR: not valid option given.
             printf("head: invalid trailing option -- %c\n", argvI[j]);
             return -1;
         }
@@ -112,39 +115,77 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < fileIndex; ++i) {
     // Get index of file; -1 = failed.
     int fileDescriptor = open(fileNames[i], O_RDONLY);
-    // Failed to open file; print and exit.
+    // ERROR: Failed to open file; print and exit.
     if (fileDescriptor == -1) {
       printf("head: cannot open \'%s\' for reading: ", fileNames[i]);
       printf("No such file or directory\n");
       return -1;
     }
-    // File name given was a directory; print and exit.
+    // ERROR: File name given was a directory; print and exit.
     if (opendir(fileNames[i]) != NULL) {
       printf("head: error reading \'%s\': Is a directory\n", fileNames[i]);
       return -1;
     }
-    // Everything is fine.
-    struct utmp currentFile;
-    while (read(fileDescriptor, &currentFile, 7)) {
-      printf("%s\n", currentFile.ut_line);
+
+    // Everything is fine; print file name(s)?
+    if (printHeaders == 1 || (printHeaders == 0 && fileIndex > 1)) {
+      printf("==> %s <==\n", fileNames[i]);
+    }
+
+    // Print file content.
+    char fileChar;
+    int cursor = 0;
+    if (printFlag == 'c') {  // Print characters.
+      while (read(fileDescriptor, &fileChar, 1) && cursor < amountToPrint) {
+        printf("%c", fileChar);
+        ++cursor;
+      }
+    } else {  // Print lines.
+      while (read(fileDescriptor, &fileChar, 1) && cursor < amountToPrint) {
+        printf("%c", fileChar);
+        if (fileChar == '\n') {
+          ++cursor;
+        }
+      }
+    }
+
+    // Skips line for next file.
+    if (printHeaders != -1 && i < fileIndex - 1) {
+      printf("\n");
     }
   }
 
-  //
+  /*
   // FOR DEBUGING: Print information
   printf("%c | %d | %d\n", printFlag, amountToPrint, printHeaders);
   for (int i = 0; i < fileIndex; ++i) {
     printf("%s\n", fileNames[i]);
   }
-  //
+  */
 
   return 0;
 }
 
+
+/**
+ * Checks whether a char is an int.
+ * 
+ * @param toCheck - the char to check if it is an int.
+ * @return int - 1 = true, 0 = false.
+ */ 
 int charIsInt(char toCheck) {
+  printf("%d", toCheck > 47 && toCheck < 58);
   return toCheck > 47 && toCheck < 58;
 }
 
+
+/**
+ * Converts an uppercase char to lowercase.
+ * If char is not valid, it is left alone and returned.
+ * 
+ * @param c - the char to convert.
+ * @return char - the lowercased char/untouched char (if invalid).
+ */
 char toLower(char c) {
   if (c > 64 && c < 91) {
     return c + 32;
@@ -152,7 +193,14 @@ char toLower(char c) {
   return c;
 }
 
-int cArrayToInt(char *cArray) {
+
+/**
+ * Converts a char array (string) into an int.
+ * 
+ * @param *cArray - points to the char array to convert.
+ * @return int - the converted char or -1 if failed.
+ */
+int cArrayToInt(const char *cArray) {
   int value = 0;
   int cArraySize = strlen(cArray);
   // Nothing to convert!
