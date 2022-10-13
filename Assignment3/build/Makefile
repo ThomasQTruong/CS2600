@@ -24,12 +24,6 @@ $(OUTPUT_NAME): $(PATHS)
 $(BIN)%.o: $(SRC)%.c
 	g++ -c -o $@ $<
 
-# make run.
-run:
-	make clean
-	make
-	$(BIN)$(OUTPUT_NAME)
-
 # make clean.
 clean:
 	rm -f $(BIN)*
