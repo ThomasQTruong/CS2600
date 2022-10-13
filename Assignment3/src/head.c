@@ -155,14 +155,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  /*
-  // FOR DEBUGING: Print information
-  printf("%c | %d | %d\n", printFlag, amountToPrint, printHeaders);
-  for (int i = 0; i < fileIndex; ++i) {
-    printf("%s\n", fileNames[i]);
-  }
-  */
-
   return 0;
 }
 
