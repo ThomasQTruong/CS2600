@@ -11,29 +11,50 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <string.h>
+
+int countCharInString(char *s, char target);
 
 int main(int argc, char *argv[]) {
-  char *folderNames[argc - 1];
-  int folderIndex = 0;
+  char *dirNames[argc - 1];
+  int dirIndex = 0;
+  int pFlag = 0;
 
   // For every argument in argv.
   for (int i = 1; i < argc; ++i) {
     // If argument is a flag.
     if ((argv[i])[0] == '-') {
     } else {  // Not a flag, is folder name.
-      folderNames[folderIndex] = argv[i];
-      ++folderIndex;
+      dirNames[dirIndex] = argv[i];
+      ++dirIndex;
     }
   }
 
-  for (int i = 0; i < folderIndex; ++i) {
-    DIR *dirPtr = opendir(folderNames[i]);
-    if (dirPtr == NULL) {
-      int createDir = mkdir(folderNames[i], S_IRWXU);
-    } else {
-      printf("Already exists!\n");
+  // For every folder name.
+  for (int i = 0; i < dirIndex; ++i) {
+    int createDir = mkdir(dirNames[i], S_IRWXU);
+    // An error occured when creating directory.
+    if (errno != 0) {
+      // Print error message.
+      printf("mkdir: cannot create directory \'%s\': %s\n",
+              dirNames[i], strerror(errno));
+    }
+    printf("%i\n", errno);
+    if (errno == 2) {  // Parent directory(s) doesnt exist.
+      // Recursively create directory(s) if needed.
     }
   }
 
   return 0;
+}
+
+int countCharInString(char *s, char target) {
+  int count = 0;
+  for (int i = 0; s[i] != '\0'; ++i) {
+    if (s[i] == target) {
+      ++count;
+    }
+  }
+  return count;
 }
