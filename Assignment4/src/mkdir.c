@@ -14,7 +14,7 @@
 #include <errno.h>
 #include <string.h>
 
-int countCharInString(char *s, char target);
+int countCharInString(const char *s, const char target);
 
 int main(int argc, char *argv[]) {
   char *dirNames[argc - 1];
@@ -41,15 +41,27 @@ int main(int argc, char *argv[]) {
               dirNames[i], strerror(errno));
     }
     printf("%i\n", errno);
-    if (errno == 2) {  // Parent directory(s) doesnt exist.
+    if (errno == 2) {  // -p flag used.
       // Recursively create directory(s) if needed.
+      // int dirSize = sizeof(dirNames[i]) / sizeof(char);
+      // for (int j = 0; j < dirSize; ++j) {
+
+      // }
+      char *currentStr = dirNames[i];
+      char *remainder = NULL;
+      do {
+        strtok_r(currentStr, "/", &remainder);
+        printf("%s\n", currentStr);
+        mkdir(currentStr, S_IRWXU);
+        currentStr = remainder;
+      } while ((countCharInString(remainder, '/') > 0));
     }
   }
 
   return 0;
 }
 
-int countCharInString(char *s, char target) {
+int countCharInString(const char *s, const char target) {
   int count = 0;
   for (int i = 0; s[i] != '\0'; ++i) {
     if (s[i] == target) {
