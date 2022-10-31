@@ -66,22 +66,25 @@ int main(int argc, char *argv[]) {
     // No parent(s) error and -p flag used.
     if (errno == 2 && pFlag == 1) {
       // Create directory(s) if needed.
-      // Dynamically allocate space to fullPath and currentPath.
-      char *fullPath = dirNames[i];
+      // Dynamically allocate space to currentPath.
       char *currentPath = (char*)calloc(strlen(dirNames[i]) + 1, sizeof(char));
 
       // Stores the dir extracted.
       char *bufferStr = NULL;
 
       // Amount of times to repeat loop.
-      int repeatAmount = countCharInString(fullPath, '/');
+      int repeatAmount = countCharInString(dirNames[i], '/');
 
       // Create every folder needed.
       while (repeatAmount >= 0) {
-        bufferStr = strtok_r(fullPath, "/", &fullPath);
+        // Get a single directory from dirNames[i].
+        bufferStr = strtok_r(dirNames[i], "/", &(dirNames[i]));
         strcat(currentPath, bufferStr);
         strcat(currentPath, "/");
+
+        // Try to make directory.
         int success = mkdir(currentPath, S_IRWXU);
+        // Print if needed.
         if (success == 0 && vFlag == 1) {  // Succeded (-1 is fail).
           printf("mkdir: created directory \'%s\'\n", currentPath);
         }
