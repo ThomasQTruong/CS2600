@@ -87,6 +87,9 @@ int main(int argc, char *argv[]) {
       while (repeatAmount >= 0) {
         // Get a single directory from dirNames[i].
         bufferStr = strtok_r(dirNames[i], "/", &(dirNames[i]));
+        if (bufferStr == NULL) {  // No other directory; stop.
+          break;
+        }
         strcat(currentPath, bufferStr);
         strcat(currentPath, "/");
 
