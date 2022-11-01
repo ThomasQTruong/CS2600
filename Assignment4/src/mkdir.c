@@ -3,7 +3,7 @@
  * Bronco ID: 014426906
  * CS2600, Fall 2022
  * Programming Assignment 4
- * Replication of mkdir UNIX command.
+ * Replication of mkdir UNIX command (no -m and -Z flag).
  */
 
 #include <stdio.h>
@@ -17,6 +17,7 @@
 
 // Counts the amount of times a char appears in string.
 int countCharInString(const char *s, const char target);
+
 
 int main(int argc, char *argv[]) {
   char *dirNames[argc - 1];   // Array that contains the directory names.
@@ -55,14 +56,17 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // For every folder name.
+  // For every directory name [create dir(s)].
   for (int i = 0; i < dirIndex; ++i) {
-    int createDir = mkdir(dirNames[i], S_IRWXU);
+    // Create directory if possible.
+    mkdir(dirNames[i], S_IRWXU);
+
     // An error occured when creating directory.
     if (errno != 0 && pFlag == 0) {
-      // Print error message.
+      // Print error message and exit.
       printf("mkdir: cannot create directory \'%s\': %s\n",
               dirNames[i], strerror(errno));
+      return -1;
     } else if (errno == 0 && vFlag == 1) {
       // Error did not occur and verbose flag is true.
       printf("mkdir: created directory \'%s\'\n", dirNames[i]);
@@ -70,28 +74,30 @@ int main(int argc, char *argv[]) {
 
     // No parent(s) error and -p flag used.
     if (errno == 2 && pFlag == 1) {
-      // Create directory(s) if needed.
       // Dynamically allocate space to currentPath.
       char *currentPath = (char*)calloc(strlen(dirNames[i]) + 1, sizeof(char));
 
-      // Stores the dir extracted.
+      // Stores the dir name extracted.
       char *bufferStr = NULL;
 
       // Amount of times to repeat loop.
       int repeatAmount = countCharInString(dirNames[i], '/');
 
-      // Create every folder needed.
+      // Create every folder needed one by one.
       while (repeatAmount >= 0) {
         // Get a single directory from dirNames[i].
         bufferStr = strtok_r(dirNames[i], "/", &(dirNames[i]));
         strcat(currentPath, bufferStr);
         strcat(currentPath, "/");
 
-        // Try to make directory.
-        int success = mkdir(currentPath, S_IRWXU);
-        // Print if needed.
-        if (success == 0 && vFlag == 1) {  // Succeded (-1 is fail).
-          printf("mkdir: created directory \'%s\'\n", currentPath);
+        // Extracted dir not .. or . (previous or current dir notation).
+        if (bufferStr != ".." || bufferStr != ".") {
+          // Try to make directory.
+          int success = mkdir(currentPath, S_IRWXU);
+          // Print if needed.
+          if (success == 0 && vFlag == 1) {  // Succeded (-1 is fail).
+            printf("mkdir: created directory \'%s\'\n", currentPath);
+          }
         }
         repeatAmount--;
       }
@@ -103,7 +109,6 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-
 
 
 /**
