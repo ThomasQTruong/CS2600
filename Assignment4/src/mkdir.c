@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     // If argument is a flag.
     if (argvI[0] == '-') {
       int argvISize = strlen(argvI);
-      for (int j = 0; j < argvISize; ++j) {
+      for (int j = 1; j < argvISize; ++j) {
         switch (argvI[j]) {
           // p flag (parents).
           case 'p':
@@ -41,6 +41,11 @@ int main(int argc, char *argv[]) {
           case 'v':
           case 'V':
             vFlag = 1;
+          break;
+          // Invalid flag.
+          default:
+            printf("mkdir: invalid option -- \'%c\'\n", argvI[j]);
+            return -1;
           break;
         }
       }
