@@ -19,6 +19,7 @@ int stringToInt(char *toConvert);
 int main(int argc, char *argv[]) {
   int timeoutSeconds = 10;  // Seconds till timeout (default: 10).
   char *fileName = NULL;    // Name of file.
+  int verbose = 0;          // Verbose flag.
 
   // For every argument (skip ./timeout).
   for (int i = 1; i < argc; ++i) {
@@ -50,6 +51,7 @@ int main(int argc, char *argv[]) {
                       argvi[1]);
               return -1;
             }
+          // Verbose flag.
           } else {  // format: -tN
             // N is an int; convert to int.
             if (isInt(argvi + 2)) {
@@ -77,20 +79,45 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
+  // Create stat buffer and obtain the stats of fileName.
   struct stat sb;
   int success = stat(fileName, &sb);
-  time_t modificationTime = sb.st_mtime;
-  time_t currentTime = time(0);
-  int diff = currentTime - modificationTime;
+  // File not found.
+  if (success == -1) {
+    printf("timeout: file not found\n");
+    return 1;
+  }
+
+  // Get process ID.
   int pid = getpid();
 
-  while (diff < timeoutSeconds) {
-    printf("%s%i\n", ctime(&modificationTime), diff);
+  // Get current modifcation time for file.
+  time_t modificationTime = sb.st_mtime;
+
+  // Sleep timeoutSeconds times.
+  for (int counter = 0; counter < timeoutSeconds; ++counter) {
     sleep(1);
-    modificationTime = sb.st_mtime;
-    currentTime = time(0);
-    diff = currentTime - modificationTime;
+
+    // Reobtain file stats.
+    success = stat(fileName, &sb);
+    // File not found.
+    if (success == -1) {
+      printf("timeout: file not found\n");
+      return 1;
+    }
+
+    // Print time and counter if verbose flag is used.
+    if (verbose == 1) {
+      printf("%sCounter: %i\n", ctime(&modificationTime), counter);
+    }
+
+    // Time changed; file modified - resleep timeoutSeconds times.
+    if (modificationTime != sb.st_mtime) {
+      counter = -1;
+      modificationTime = sb.st_mtime;
+    }
   }
+  // Slept for too long! Kill process.
   kill(pid, SIGKILL);
 
   return 0;
