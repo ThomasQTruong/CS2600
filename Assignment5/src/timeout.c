@@ -29,15 +29,34 @@ int main(int argc, char *argv[]) {
     if (argvi[0] == '-') {
       int argviSize = strlen(argvi);  // Get size.
 
-      // Isn't just '-' (more to check).
-      if (argviSize > 1) {
-        // t flag used.
-        if (argvi[1] == 't' || argvi[1] == 'T') {
-          // format: -t N
-          if (argviSize == 2) {
-            // Another argument after current arg.
-            if (i + 1 < argc) {
-              // The next argument is an int.
+      // For every character in flag.
+      for (int j = 1; j < argviSize; ++j) {
+        switch (argvi[j]) {
+          // Verbose flag.
+          case 'v':
+          case 'V':
+            verbose = 1;
+            break;
+          // Timeout seconds flag.
+          case 'T':
+          case 't':
+            // N on same index (-tN).
+            if (j + 1 < argviSize) {
+              // N is an int, store in timeoutSeconds.
+              if (isInt(&(argvi[j + 1])) == 1) {
+                timeoutSeconds = stringToInt(&(argvi[j + 1]));
+                j = argviSize;
+
+              // ERROR: Time is invalid.
+              } else {
+                printf("timeout: invalid number of seconds: \'%s\'\n",
+                        &(argvi[j + 1]));
+                return -1;
+              }
+
+            // N should be on the next element (-t N).
+            } else if (i + 1 < argc) {
+              // If the next argument is an int.
               if (isInt(argv[i + 1]) == 1) {
                 timeoutSeconds = stringToInt(argv[i + 1]);
                 ++i;  // Skip next argument since it was used for time.
@@ -46,25 +65,18 @@ int main(int argc, char *argv[]) {
                         argv[i + 1]);
                 return -1;
               }
-            } else {  // ERROR: No other argument given.
+
+            // No other argment was given. (-t)
+            } else {
               printf("timeout: option requires an argument --\'%c\'\n",
                       argvi[1]);
               return -1;
             }
-          // Verbose flag.
-          } else {  // format: -tN
-            // N is an int; convert to int.
-            if (isInt(argvi + 2)) {
-              timeoutSeconds = stringToInt(argvi + 2);
-            } else {  // ERROR: time is invalid.
-              printf("timeout: invalid number of seconds: \'%s\'\n",
-                      argv[i + 1]);
-              return -1;
-            }
-          }
-        } else {  // ERROR: Invalid flag given.
-          printf("timeout: invalid trailing option -- %c\n", argvi[1]);
-          return -1;
+            break;
+          // Invalid flag.
+          default:
+            printf("timeout: invalid option -- \'%c\'\n", argvi[j]);
+            return 1;
         }
       }
     } else {
