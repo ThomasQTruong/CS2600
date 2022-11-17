@@ -9,10 +9,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <time.h>
+#include <signal.h>
+#include <unistd.h>
 
 int isInt(char *toCheck);
 int stringToInt(char *toConvert);
-
 
 int main(int argc, char *argv[]) {
   int timeoutSeconds = 10;  // Seconds till timeout (default: 10).
@@ -74,6 +76,22 @@ int main(int argc, char *argv[]) {
     printf("timeout: no file given\n");
     return -1;
   }
+
+  struct stat sb;
+  int success = stat(fileName, &sb);
+  time_t modificationTime = sb.st_mtime;
+  time_t currentTime = time(0);
+  int diff = currentTime - modificationTime;
+  int pid = getpid();
+
+  while (diff < timeoutSeconds) {
+    printf("%s%i\n", ctime(&modificationTime), diff);
+    sleep(1);
+    modificationTime = sb.st_mtime;
+    currentTime = time(0);
+    diff = currentTime - modificationTime;
+  }
+  kill(pid, SIGKILL);
 
   return 0;
 }
