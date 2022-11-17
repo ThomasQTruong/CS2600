@@ -8,14 +8,15 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <sys/stat.h>
 
 int isInt(char *toCheck);
 int stringToInt(char *toConvert);
 
 
 int main(int argc, char *argv[]) {
-  int timeoutSeconds = 10;  // Default time is 10 seconds.
-  char *fileName = NULL;
+  int timeoutSeconds = 10;  // Seconds till timeout (default: 10).
+  char *fileName = NULL;    // Name of file.
 
   // For every argument (skip ./timeout).
   for (int i = 1; i < argc; ++i) {
