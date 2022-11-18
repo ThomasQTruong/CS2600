@@ -14,10 +14,14 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-// Function Prototypes.
+
+// Checks whether the string is an int.
 int isInt(char *toCheck);
+// Converts string to int.
 int stringToInt(char *toConvert);
+// Extracts data from the command-line arguments.
 struct Data getData(int argc, char *argv[]);
+
 
 // Contains the program settings.
 struct Data {
@@ -76,7 +80,12 @@ int main(int argc, char *argv[]) {
 }
 
 
-// Checks whether the string is an int.
+/**
+ * Checks whether the string is an int.
+ * 
+ * @param toCheck - the string to check.
+ * @return int - 0: false | 1: true.
+ */ 
 int isInt(char *toCheck) {
   int toCheckSize = strlen(toCheck);
 
@@ -93,7 +102,12 @@ int isInt(char *toCheck) {
 }
 
 
-// Converts string to integer.
+/**
+ * Converts string to int.
+ * 
+ * @param toConvert - the string to convert.
+ * @return int - the converted string.
+ */
 int stringToInt(char *toConvert) {
   int toConvertSize = strlen(toConvert);
   int converted = 0;  // converted value of toConvert.
@@ -110,6 +124,13 @@ int stringToInt(char *toConvert) {
 }
 
 
+/**
+ * Extracts data from the command-line arguments.
+ * 
+ * @param argc - arguments count
+ * @param argv - ptr to argument vector.
+ * @return struct Data - the struct containing the extracted data.
+ */
 struct Data getData(int argc, char *argv[]) {
   struct Data data;
   data.timeoutSeconds = 10;  // Default 10 seconds.
