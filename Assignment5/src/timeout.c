@@ -3,7 +3,7 @@
  * Bronco ID: 014426906
  * CS2600, Fall 2022
  * Programming Assignment 5
- * Timeout.c - Add more to this.
+ * Timeout.c - Kills a process if it has been asleep for too long.
  */
 
 #include <string.h>
