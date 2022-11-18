@@ -14,10 +14,12 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+// Function Prototypes.
 int isInt(char *toCheck);
 int stringToInt(char *toConvert);
 struct Data getData(int argc, char *argv[]);
 
+// Contains the program settings.
 struct Data {
   int timeoutSeconds;  // Seconds till timeout (default: 10).
   char *fileName;      // Name of file.
@@ -110,6 +112,8 @@ int stringToInt(char *toConvert) {
 
 struct Data getData(int argc, char *argv[]) {
   struct Data data;
+  data.timeoutSeconds = 10;  // Default 10 seconds.
+  data.verbose = 0;          // Default turned off.
 
   // For every argument (skip ./timeout).
   for (int i = 1; i < argc; ++i) {
