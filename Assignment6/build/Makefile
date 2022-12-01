@@ -6,7 +6,7 @@
 SRC = ../src/
 BIN = ../bin/
 # Output file name, default: main -> (main.c).
-OUTPUT_NAME = main
+OUTPUT_NAME = tee
 
 # Every object file needed for linking.
 OBJECTS = tee.o
