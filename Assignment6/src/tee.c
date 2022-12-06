@@ -3,7 +3,7 @@
  * Bronco ID: 014426906
  * CS2600, Fall 2022
  * Programming Assignment 6
- * Tee.c - 
+ * tee.c - replica of the tee command, but only supports -a flag.
  */
 
 #include <stdio.h>
@@ -13,9 +13,11 @@
 #include <sys/stat.h>
 #include <signal.h>
 #include <stdlib.h>
-#include <stdio.h>
 
+
+// Handles the interrupt signal.
 void sig_handler(int signo);
+
 
 int main(int argc, char *argv[]) {
   int appendMode = 0;      // Append off by default.
@@ -62,15 +64,13 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-
-  // !!! Work on this part.
-
   // Store file descriptors of every file.
   int fileDescriptors[fileNamesIndex];
   for (int i = 0; i < fileNamesIndex; ++i) {
-    // Not append mode, open file in write only.
+    // Not append mode, open blank file in write only mode.
     if (appendMode == 0) {
-      fileDescriptors[i] = open(fileNames[i], O_WRONLY | O_CREAT, S_IRWXU);
+      fileDescriptors[i] = open(fileNames[i], O_TRUNC | O_WRONLY
+                                | O_CREAT, S_IRWXU);
 
     // Append mode, open file in append mode.
     } else {
@@ -79,17 +79,15 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  char test[100];
-
-  do {
-    scanf("%s", test);
-    printf("%s\n", test);
+  // Get user input.
+  char userInput;
+  while (fgets(&userInput, 2, stdin)) {
+    printf("%c", userInput);
+    // Write to every file given.
     for (int i = 0; i < fileNamesIndex; ++i) {
-      write(fileDescriptors[i], test, strlen(test));
+      write(fileDescriptors[i], &userInput, 1);
     }
-  } while (1);
-
-  // !!! Till this.
+  }
 
   // Close every used file.
   for (int i = 0; i < fileNamesIndex; ++i) {
@@ -99,10 +97,17 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
+
+/**
+ * Handles the interrupt signal.
+ * 
+ * @param signo - the signal ID.
+ */
 void sig_handler(int signo)
 {
   if (signo == SIGINT) {
-    printf("received SIGINT\n");
+    // Skip line after signal pressed and exit.
+    puts("");
+    exit(1);
   }
-  exit(1);
 }
