@@ -103,8 +103,7 @@ int main(int argc, char *argv[]) {
  * 
  * @param signo - the signal ID.
  */
-void sig_handler(int signo)
-{
+void sig_handler(int signo) {
   if (signo == SIGINT) {
     // Skip line after signal pressed and exit.
     puts("");
